@@ -53,7 +53,7 @@
   aria-label="Svelte DevTools"
   style="left: {panelX}px; top: {panelY}px;"
 >
-  <div class="titlebar" role="toolbar" tabindex="0" onpointerdown={startDrag}>
+  <div class="titlebar" role="toolbar" tabindex="0" onpointerdown={alwaysOpen ? undefined : startDrag} style={alwaysOpen ? 'cursor:default' : ''}>
     <div class="titlebar-left">
       <button
         class="tb-btn"

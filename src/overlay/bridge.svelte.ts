@@ -79,7 +79,7 @@ export const bridge = $state({
   events: [] as EventEntry[],
   stores: {} as Record<string, unknown>,
   writableStores: [] as string[],
-  activeTab: 'inspector' as 'inspector' | 'stores' | 'perf' | 'history' | 'settings',
+  activeTab: 'inspector' as 'inspector' | 'stores' | 'perf' | 'history',
   pickMode: false,
   // Whether the runtime is currently collecting and sending node data.
   // false = paused (zero overhead); true = active.

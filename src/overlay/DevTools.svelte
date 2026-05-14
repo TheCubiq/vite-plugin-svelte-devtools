@@ -1,11 +1,9 @@
 <script lang="ts">
-  import { bridge, togglePickMode, setTracking, settings } from './bridge.svelte'
+  import { bridge, togglePickMode, setTracking } from './bridge.svelte'
   import InspectorPane from './components/InspectorPane.svelte'
   import StoreInspector from './components/StoreInspector.svelte'
   import PerfPanel from './components/PerfPanel.svelte'
   import HistoryPanel from './components/HistoryPanel.svelte'
-  import SettingsPanel from './components/SettingsPanel.svelte'
-
   type Tab = typeof bridge.activeTab
 
   const TABS: { id: Tab; label: string }[] = [
@@ -13,7 +11,6 @@
     { id: 'stores', label: 'Stores' },
     { id: 'perf', label: 'Perf' },
     { id: 'history', label: 'History' },
-    { id: 'settings', label: 'Settings' },
   ]
 
   interface Props { alwaysOpen?: boolean }
@@ -54,7 +51,7 @@
   class:paused={!bridge.tracking}
   role="complementary"
   aria-label="Svelte DevTools"
-  style="font-size: {settings.fontSize}px; left: {panelX}px; top: {panelY}px;"
+  style="left: {panelX}px; top: {panelY}px;"
 >
   <div class="titlebar" role="toolbar" tabindex="0" onpointerdown={startDrag}>
     <div class="titlebar-left">
@@ -124,26 +121,15 @@
 
   <nav class="tabs">
     {#each TABS as tab}
-      {#if tab.id !== 'settings'}
-        <button
-          role="tab"
-          aria-selected={bridge.activeTab === tab.id}
-          class:active={bridge.activeTab === tab.id}
-          onclick={() => (bridge.activeTab = tab.id)}
-        >
-          {tab.label}{tab.id === 'history' && bridge.propHistory.length ? ` (${bridge.propHistory.length})` : ''}
-        </button>
-      {/if}
+      <button
+        role="tab"
+        aria-selected={bridge.activeTab === tab.id}
+        class:active={bridge.activeTab === tab.id}
+        onclick={() => (bridge.activeTab = tab.id)}
+      >
+        {tab.label}{tab.id === 'history' && bridge.propHistory.length ? ` (${bridge.propHistory.length})` : ''}
+      </button>
     {/each}
-    <button
-      role="tab"
-      aria-selected={bridge.activeTab === 'settings'}
-      class:active={bridge.activeTab === 'settings'}
-      class="settings-tab"
-      onclick={() => (bridge.activeTab = 'settings')}
-    >
-      Settings
-    </button>
   </nav>
 
   <div class="content">
@@ -155,8 +141,6 @@
       <PerfPanel />
     {:else if bridge.activeTab === 'history'}
       <HistoryPanel />
-    {:else if bridge.activeTab === 'settings'}
-      <SettingsPanel />
     {/if}
   </div>
 </div>

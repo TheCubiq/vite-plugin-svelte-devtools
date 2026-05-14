@@ -27,7 +27,7 @@ const spaConfig = defineConfig({
     outDir: resolve(__dirname, 'dist/client'),
     emptyOutDir: true,
     sourcemap: false,
-    rollupOptions: {
+    rolldownOptions: {
       input: resolve(__dirname, 'src/overlay/index.html'),
     },
   },
@@ -38,7 +38,7 @@ const libConfig = defineConfig({
   build: {
     outDir: 'dist',
     sourcemap: false,
-    rollupOptions: {
+    rolldownOptions: {
       input: {
         'plugin/index': resolve(__dirname, 'src/plugin/index.ts'),
         'overlay/overlay': resolve(__dirname, 'src/overlay/main.ts'),

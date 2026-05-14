@@ -1,6 +1,6 @@
 <script lang="ts">
   import type { ComponentNode } from '../bridge.svelte'
-  import { bridge, rootNodes, selectNode } from '../bridge.svelte'
+  import { bridge, rootNodes, selectNode, highlightNode } from '../bridge.svelte'
 
   const ROW_H = 24   // px per row
   const OVERSCAN = 8 // extra rows above/below viewport
@@ -212,6 +212,8 @@
           style="top:{top}px; padding-left:{depth * 14 + 4}px"
           onclick={() => selectNode(node.id)}
           onkeydown={(e) => (e.key === 'Enter' || e.key === ' ') && selectNode(node.id)}
+          onpointerenter={() => highlightNode(node.id)}
+          onpointerleave={() => highlightNode(null)}
           role="treeitem"
           aria-selected={isSelected}
           tabindex="0"

@@ -6,6 +6,15 @@
     const node = selectedNode()
     return node ? Object.entries(node.context ?? {}) : null
   })
+
+  let copiedKey = $state<string | null>(null)
+
+  function copyValue(key: string, val: unknown) {
+    navigator.clipboard.writeText(JSON.stringify(val)).then(() => {
+      copiedKey = key
+      setTimeout(() => { copiedKey = null }, 1200)
+    })
+  }
 </script>
 
 <div class="section">
@@ -20,12 +29,21 @@
   {:else}
     <p class="hint">Context available to <strong>{selectedNode()?.name}</strong>:</p>
     <table>
-      <thead><tr><th>Key</th><th>Value</th></tr></thead>
+      <thead><tr><th>Key</th><th>Value</th><th style="width:22px"></th></tr></thead>
       <tbody>
         {#each entries as [key, val] (key)}
           <tr>
             <td class="ctx-key">{key}</td>
             <td class="val">{JSON.stringify(val)}</td>
+            <td class="copy-cell">
+              <button
+                class="copy-btn"
+                class:copied={copiedKey === key}
+                onclick={() => copyValue(key, val)}
+                title="Copy value"
+                aria-label="Copy value"
+              >{copiedKey === key ? '✓' : '⎘'}</button>
+            </td>
           </tr>
         {/each}
       </tbody>

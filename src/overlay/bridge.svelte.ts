@@ -404,7 +404,7 @@ initTransport()
 
 export function selectNode(id: NodeId | null) {
   bridge.selectedId = id
-  send({ type: 'dt:cmd:highlight', id })
+  // Highlighting is driven by hover only — don't send a highlight on select.
 }
 
 export function highlightNode(id: NodeId | null) {

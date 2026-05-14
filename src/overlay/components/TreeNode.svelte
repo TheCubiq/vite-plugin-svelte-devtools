@@ -1,6 +1,6 @@
 <script lang="ts">
   import type { ComponentNode } from '../bridge.svelte'
-  import { bridge, selectNode } from '../bridge.svelte'
+  import { bridge, selectNode, highlightNode } from '../bridge.svelte'
   import TreeNode from './TreeNode.svelte'
 
   interface Props {
@@ -34,6 +34,8 @@
     style="padding-left: {depth * 14}px"
     onclick={() => selectNode(node.id)}
     onkeydown={(e) => (e.key === 'Enter' || e.key === ' ') && selectNode(node.id)}
+    onpointerenter={() => highlightNode(node.id)}
+    onpointerleave={() => highlightNode(null)}
     role="treeitem"
     aria-selected={isSelected}
     tabindex="0"

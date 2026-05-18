@@ -134,6 +134,21 @@
     return rows
   })
 
+  // ── scroll selected node into view ─────────────────────────────────────────
+  $effect(() => {
+    const id = bridge.selectedId
+    if (!id || !viewportEl) return
+    const idx = visibleRows.findIndex(r => r.node.id === id)
+    if (idx === -1) return
+    const rowTop = idx * ROW_H
+    const rowBot = rowTop + ROW_H
+    if (rowTop < scrollTop) {
+      viewportEl.scrollTop = rowTop
+    } else if (rowBot > scrollTop + viewportH) {
+      viewportEl.scrollTop = rowBot - viewportH
+    }
+  })
+
   // ── virtual scroll ─────────────────────────────────────────────────────────
   let scrollTop = $state(0)
   let viewportH = $state(400)

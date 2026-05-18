@@ -31,6 +31,8 @@ Works as a native tab inside the **[@vitejs/devtools](https://github.com/vitejs/
 | **Pause / Resume** | Freeze tracking with zero runtime overhead while paused |
 | **Open in Editor** | Jump directly to a component's source file |
 
+> **Note** — only dark mode theming is currently supported in the devtools panel.
+
 ---
 
 ## Requirements

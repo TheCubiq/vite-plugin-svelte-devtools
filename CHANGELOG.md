@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.1.5] - 2026-05-19
+
+### Fixed
+- **Component tree collapse on selection**: selecting a component (via click, component picker, or programmatically) now automatically expands all collapsed ancestor nodes so the selected item is always visible and scrolled into view. Previously the tree could collapse around the selected node, leaving it invisible.
+
+### Changed
+- **Dropped collapsed-state persistence**: the buggy name-based localStorage persistence for collapsed tree nodes has been removed. Collapsed state now resets on page refresh. The previous implementation collapsed every component sharing the same name whenever any one of them was collapsed, and could re-collapse nodes that were intentionally expanded during selection.
+
+### Added
+- **Plugin-level tests moved into repo**: `tests/preprocessor.test.ts` (53 tests) and `tests/open-in-editor.test.ts` (9 tests) are now versioned in the plugin repo. Previously they lived only in the untracked demo-app.
+
+---
+
 ## [0.1.4] - 2026-05-18
 
 ### Fixed

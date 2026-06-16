@@ -312,6 +312,38 @@ describe('markup transform', () => {
     const result = pp.markup!({ content: '<div></div>', filename: '/node_modules/lib/Comp.svelte' } as any)
     expect((result as any).code).toBe('<div></div>')
   })
+
+  it('injects use:__sdt_root__ action on the root element', () => {
+    const code = markupTransform(`<div class="app"><slot /></div>`)
+    expect(code).toContain('use:__sdt_root__')
+  })
+
+  it('does NOT inject use: action on Svelte component tags', () => {
+    const code = markupTransform(`<Portal><div>content</div></Portal>`)
+    expect(code).not.toContain('<Portal data-sdt')
+    expect(code).not.toContain('<Portal use:')
+    // It should still find the first real HTML element (the inner <div>)
+    expect(code).toContain('<div data-sdt="TestComp" use:__sdt_root__')
+  })
+})
+
+// ── script: root element registration (performance) ───────────────────────────
+
+describe('root element registration', () => {
+  it('defines a __sdt_root__ action that calls __sdt_update_el__', () => {
+    const code = scriptTransform(`let count = $state(0)`)
+    expect(code).toMatch(/function\s+__sdt_root__\s*\(\s*el\s*\)\s*\{\s*__sdt_update_el__\s*\(\s*__sdt_id__\s*,\s*el\s*\)\s*;?\s*\}/)
+  })
+
+  it('does NOT scan the DOM with document.querySelectorAll on mount', () => {
+    const code = scriptTransform(`let count = $state(0)`)
+    expect(code).not.toContain('document.querySelectorAll')
+  })
+
+  it('does NOT querySelector for data-sdt-id during mount', () => {
+    const code = scriptTransform(`let count = $state(0)`)
+    expect(code).not.toMatch(/querySelector\([^)]*data-sdt-id/)
+  })
 })
 
 // ── script: perf timing injection ────────────────────────────────────────────

@@ -14,7 +14,7 @@
  *   <script>
  *     import { onMount as __sdt_om__, onDestroy as __sdt_od__ } from 'svelte'
  *     import {
- *       __sdt_mount__, __sdt_unmount__, __sdt_update__, __sdt_event__
+ *       __sdt_mount__, __sdt_unmount__, __sdt_update__, __sdt_update_el__, __sdt_event__
  *     } from 'virtual:svelte-devtools/runtime'
  *
  *     let { label = 'hi' } = $props()   // ← original code untouched
@@ -22,17 +22,14 @@
  *     const doubled = $derived(count * 2)
  *
  *     // ── injected ──────────────────────────────────────────────────────
- *     let __sdt_id__ = ''
  *     const __sdt_inst__ = {}
- *     __sdt_om__(() => {
- *       __sdt_id__ = __sdt_mount__(
- *         __sdt_inst__, 'MyComponent', null,
- *         () => ({ label }),
- *         () => ({ count, doubled }),
- *         () => ({}),
- *         () => document.querySelector('[data-sdt-id]') ?? null,
- *       )
- *     })
+ *     const __sdt_id__ = __sdt_mount__(
+ *       __sdt_inst__, 'MyComponent', null,
+ *       () => ({ label }),
+ *       () => ({ count, doubled }),
+ *       () => ({}),
+ *     )
+ *     function __sdt_root__(el) { __sdt_update_el__(__sdt_id__, el); }
  *     __sdt_od__(() => __sdt_unmount__(__sdt_id__))
  *     $effect(() => {
  *       const __t0__ = performance.now()
@@ -145,14 +142,14 @@ ${propSetterCases}
 // Expose our id so direct children can read it via getContext.
 __sdt_sc__('__sdt__', __sdt_id__);
 ${dispatchWrapper}
+// Action called by Svelte when this component's root element is created.
+// This gives us the exact DOM node without an expensive document-wide querySelectorAll scan.
+function __sdt_root__(el) {
+  __sdt_update_el__(__sdt_id__, el);
+}${storeSubscriptions ? `
 __sdt_om__(() => {
-  // Now the DOM exists — find this instance's root element and register it.
-  const __sdt_el__ = Array.from(
-    document.querySelectorAll('[data-sdt="${componentName}"]')
-  ).find(el => !el.hasAttribute('data-sdt-id')) ?? null;
-  __sdt_update_el__(__sdt_id__, __sdt_el__);
 ${storeSubscriptions}
-});
+});` : ''}
 __sdt_od__(() => __sdt_unmount__(__sdt_id__));
 $effect(() => {
   if (!__sdt_id__) return;
@@ -199,8 +196,8 @@ $effect(() => {
       }
     },
 
-    // Inject data-sdt attribute onto the root element so the runtime can
-    // find it via querySelector.
+    // Inject data-sdt attribute and a use:action onto the root element so the
+    // runtime receives the exact DOM node without an expensive querySelectorAll scan.
     markup({ content, filename }) {
       if (filename?.includes('node_modules')) return { code: content }
       if (filename?.includes('svelte-devtools')) return { code: content }
@@ -214,12 +211,12 @@ $effect(() => {
         .replace(/<script[\s\S]*?<\/script>/gi, (m) => ' '.repeat(m.length))
         .replace(/<style[\s\S]*?<\/style>/gi, (m) => ' '.repeat(m.length))
 
-      // Find the first real HTML element in the template that can accept attributes.
-      // Excluded: svelte: special tags, comments, <title> (Svelte forbids attrs on it),
-      // and other void/metadata elements that cannot have arbitrary attributes.
+      // Find the first real HTML/SVG element in the template that can accept attributes.
+      // Excluded: Svelte components (uppercase first letter), svelte: special tags,
+      // comments, <title> (Svelte forbids attrs on it), and other void/metadata elements.
       const FORBIDDEN_TAGS = new Set(['title', 'base', 'meta', 'link', 'script', 'style'])
       const match = withoutScriptsStyles.match(
-        /(<(?!svelte:|!--)[a-zA-Z][a-zA-Z0-9-]*)(\s|>)/,
+        /(<(?!svelte:|!--)[a-z][a-zA-Z0-9-]*)(\s|>)/,
       )
       if (!match || match.index == null) return { code: content }
       // Extract just the tag name (strip the leading '<')
@@ -229,7 +226,7 @@ $effect(() => {
       const idx = match.index
       const patched =
         content.slice(0, idx + match[1].length) +
-        ` data-sdt="${name}"` +
+        ` data-sdt="${name}" use:__sdt_root__` +
         content.slice(idx + match[1].length)
       return { code: patched }
     },

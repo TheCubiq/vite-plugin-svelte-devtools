@@ -115,7 +115,9 @@ export function svelteDevTools(options: SvelteDevToolsOptions = {}) {
 
     resolveId(id) {
       if (id === VIRTUAL_RUNTIME) {
-        if (!isEnabled) return '\0svelte-devtools-noop'
+        // SvelteKit evaluates every component on the server before hydrating it.
+        // Instrumentation stays in the client build; SSR gets harmless exports.
+        if (!isEnabled || this.environment.config.consumer === 'server') return '\0svelte-devtools-noop'
         return RESOLVED_VIRTUAL
       }
       if (id === VIRTUAL_DEVTOOLS_CLIENT) return RESOLVED_DEVTOOLS_CLIENT

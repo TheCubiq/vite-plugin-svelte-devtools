@@ -3,20 +3,18 @@
   "version": "0.1.7",
   "description": "Dev-tools panel for Svelte 5 + Vite apps — component tree, reactive state, props editor, event log, store inspector, performance profiler",
   "type": "module",
-  "main": "./dist/plugin/index.cjs",
-  "module": "./dist/plugin/index.js",
-  "types": "./dist/plugin/index.d.ts",
+  "main": "./plugin/index.cjs",
+  "module": "./plugin/index.js",
+  "types": "./plugin/index.d.ts",
   "exports": {
     ".": {
-      "types": "./dist/plugin/index.d.ts",
-      "import": "./dist/plugin/index.js",
-      "require": "./dist/plugin/index.cjs"
+      "types": "./plugin/index.d.ts",
+      "import": "./plugin/index.js",
+      "require": "./plugin/index.cjs"
     }
   },
   "files": [
-    "dist",
-    "README.md",
-    "LICENSE"
+    "**/*"
   ],
   "peerDependencies": {
     "@vitejs/devtools-kit": "^0.3.4",

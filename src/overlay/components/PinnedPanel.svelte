@@ -1,5 +1,6 @@
 <script lang="ts">
   import { bridge, unpinAll, unpinOne, highlightNode } from '../bridge.svelte'
+  import ValueTree from './ValueTree.svelte'
 
   interface PinnedRow {
     nodeId: string
@@ -59,7 +60,7 @@
                 <span class="kind-badge" class:state-badge={row.kind === 'state'}>{row.kind}</span>
               </td>
               <td class="key">{row.key}</td>
-              <td class="val">{JSON.stringify(row.value)}</td>
+              <td class="val"><ValueTree value={row.value} /></td>
               <td class="unpin-cell">
                 <button
                   class="unpin-btn"
@@ -89,7 +90,7 @@
   }
   .unpin-btn:hover { color: #ffb890; }
   .key { font-family: monospace; font-size: 12px; }
-  .val { font-family: monospace; font-size: 12px; word-break: break-all; max-width: 160px; }
+  .val { font-family: monospace; font-size: 12px; vertical-align: top; }
   .kind-badge {
     display: inline-block;
     font-size: 9px;

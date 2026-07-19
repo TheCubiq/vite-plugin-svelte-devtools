@@ -271,7 +271,7 @@ td { padding: 3px 6px; border-bottom: 1px solid rgba(255,255,255,0.05); }
   line-height: 1; margin-left: auto;
 }
 .scroll-btn:hover  { color: #7ecfff; }
-.key  { color: #7ecfff; width: 40%; font-family: monospace; }
+.key  { color: #7ecfff; font-family: monospace; }
 .val  { color: #c8e6c9; word-break: break-all; font-family: monospace; }
 .val-btn { background: none; border: none; color: inherit; cursor: pointer; text-align: left; width: 100%; padding: 0; font-size: 12px; font-family: monospace; }
 .val-btn:hover     { text-decoration: underline; }

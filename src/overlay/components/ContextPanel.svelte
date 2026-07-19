@@ -1,5 +1,6 @@
 <script lang="ts">
   import { selectedNode, bridge } from '../bridge.svelte'
+  import ValueTree from './ValueTree.svelte'
 
   const entries = $derived.by(() => {
     void bridge.nodesVersion
@@ -34,7 +35,7 @@
         {#each entries as [key, val] (key)}
           <tr>
             <td class="ctx-key">{key}</td>
-            <td class="val">{JSON.stringify(val)}</td>
+            <td class="val"><ValueTree value={val} /></td>
             <td class="copy-cell">
               <button
                 class="copy-btn"

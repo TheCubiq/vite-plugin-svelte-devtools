@@ -1,6 +1,7 @@
 <script lang="ts">
   import { selectedNode, setProp, togglePin, bridge, openInEditor, scrollToComponent } from '../bridge.svelte'
   import ContextPanel from './ContextPanel.svelte'
+  import ValueTree from './ValueTree.svelte'
 
   const SDT_UNDEFINED = '__sdt_undefined__'
 
@@ -8,10 +9,15 @@
   let editingKey = $state<EditingKey>(null)
   let editingValue = $state('')
   let copiedKey = $state<string | null>(null)
+  let keyPct = $state(30)
 
   function displayVal(v: unknown): string {
     if (v === SDT_UNDEFINED) return 'undefined'
     return JSON.stringify(v)
+  }
+
+  function isTreeValue(v: unknown): v is object {
+    return v !== null && typeof v === 'object'
   }
 
   function startEdit(key: string, current: unknown) {
@@ -47,6 +53,23 @@
   function shortFile(path: string): string {
     return path.replace(/.*[\\/]/, '')
   }
+
+  function onKeyDividerMousedown(event: MouseEvent) {
+    event.preventDefault()
+    const table = (event.currentTarget as HTMLElement).closest('table')
+    if (!table) return
+    const rect = table.getBoundingClientRect()
+
+    function onMove(moveEvent: MouseEvent) {
+      keyPct = Math.min(65, Math.max(15, ((moveEvent.clientX - rect.left) / rect.width) * 100))
+    }
+    function onUp() {
+      window.removeEventListener('mousemove', onMove)
+      window.removeEventListener('mouseup', onUp)
+    }
+    window.addEventListener('mousemove', onMove)
+    window.addEventListener('mouseup', onUp)
+  }
 </script>
 
 {#if selectedNode()}
@@ -76,8 +99,9 @@
     {#if Object.keys(node.props).length === 0}
       <p class="empty">No props</p>
     {:else}
-      <table>
-        <thead><tr><th style="width:22px"></th><th>Key</th><th>Value</th><th style="width:22px"></th></tr></thead>
+      <table style={`--key-width: ${keyPct}%`}>
+        <colgroup><col style="width:22px" /><col class="key-column" /><col /><col style="width:22px" /></colgroup>
+        <thead><tr><th></th><th class="key-heading">Key<button class="key-divider" onmousedown={onKeyDividerMousedown} aria-label="Resize key column"></button></th><th>Value</th><th></th></tr></thead>
         <tbody>
           {#each Object.entries(node.props) as [key, val] (key)}
             <tr>
@@ -89,7 +113,7 @@
                   title={isPinned(node.id, key) ? 'Unpin' : 'Pin prop'}
                 >⬡</button>
               </td>
-              <td class="key">{key}</td>
+              <td class="key"><span class="key-text" title={key}>{key}</span></td>
               <td class="val">
                 {#if isWritable(node, key)}
                   {#if editingKey === key}
@@ -100,6 +124,11 @@
                       onkeydown={(e) => e.key === 'Enter' && commitEdit(node.id)}
                       autofocus
                     />
+                  {:else if isTreeValue(val)}
+                    <div class="tree-value">
+                      <ValueTree value={val} />
+                      <button class="tree-edit" onclick={() => startEdit(key, val)} title="Edit value">âœŽ</button>
+                    </div>
                   {:else}
                     <button
                       class="val-btn"
@@ -109,6 +138,7 @@
                     >{displayVal(val)}</button>
                   {/if}
                 {:else}
+                  <ValueTree value={val} />
                   <span class="val-ro" title="Read-only">{displayVal(val)} <span class="lock">🔒</span></span>
                 {/if}
               </td>
@@ -134,8 +164,9 @@
     {#if Object.keys(node.state).length === 0}
       <p class="empty">No reactive state</p>
     {:else}
-      <table>
-        <thead><tr><th style="width:22px"></th><th>Key</th><th>Value</th><th style="width:22px"></th></tr></thead>
+      <table style={`--key-width: ${keyPct}%`}>
+        <colgroup><col style="width:22px" /><col class="key-column" /><col /><col style="width:22px" /></colgroup>
+        <thead><tr><th></th><th class="key-heading">Key<button class="key-divider" onmousedown={onKeyDividerMousedown} aria-label="Resize key column"></button></th><th>Value</th><th></th></tr></thead>
         <tbody>
           {#each Object.entries(node.state) as [key, val] (key)}
             <tr>
@@ -147,7 +178,7 @@
                   title={isPinned(node.id, key) ? 'Unpin' : 'Pin state'}
                 >⬡</button>
               </td>
-              <td class="key">{key}</td>
+              <td class="key"><span class="key-text" title={key}>{key}</span></td>
               <td class="val">
                 {#if isWritable(node, key)}
                   {#if editingKey === key}
@@ -158,12 +189,18 @@
                       onkeydown={(e) => e.key === 'Enter' && commitEdit(node.id)}
                       autofocus
                     />
+                  {:else if isTreeValue(val)}
+                    <div class="tree-value">
+                      <ValueTree value={val} />
+                      <button class="tree-edit" onclick={() => startEdit(key, val)} title="Edit value">&#9998;</button>
+                    </div>
                   {:else}
                     <button class="val-btn" onclick={() => startEdit(key, val)}>
                       {displayVal(val)}
                     </button>
                   {/if}
                 {:else}
+                  <ValueTree value={val} />
                   <span class="val-ro" title="$derived / const $state — read-only">
                     {displayVal(val)} <span class="lock">🔒</span>
                   </span>
@@ -231,9 +268,24 @@
   h3 { font-size: 10px; text-transform: uppercase; letter-spacing: 0.08em; opacity: 0.5; margin: 0 0 4px; }
   .empty { opacity: 0.5; font-size: 12px; margin: 0; padding: 2px 0; }
 
-  table { width: 100%; border-collapse: collapse; font-size: 12px; }
+  table { width: 100%; table-layout: fixed; border-collapse: collapse; font-size: 12px; }
   th { text-align: left; font-size: 10px; opacity: 0.5; padding: 2px 4px; }
-  td { padding: 2px 4px; vertical-align: middle; }
+  td { padding: 2px 4px; vertical-align: top; }
+  .key-column { width: var(--key-width); }
+  .key-heading, .key { border-right: 1px solid rgba(255,255,255,0.12); }
+  .key-heading { position: relative; }
+  .key-divider {
+    position: absolute;
+    z-index: 1;
+    top: 0;
+    right: -4px;
+    width: 8px;
+    height: 100%;
+    border: 0;
+    padding: 0;
+    background: transparent;
+    cursor: col-resize;
+  }
 
   .pin-cell { width: 22px; }
   .pin-btn {
@@ -242,7 +294,11 @@
   }
   .pin-btn:hover, .pin-btn.pinned { color: #ff9d6c; }
 
-  .key { font-family: monospace; color: #a8dfff; white-space: nowrap; }
+  .key {
+    font-family: monospace;
+    color: #a8dfff;
+  }
+  .key-text { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
   .val { font-family: monospace; word-break: break-all; }
   .val-btn {
@@ -252,7 +308,13 @@
   }
   .val-btn:hover { color: #ff9d6c; }
   .val-btn.val-undef { opacity: 0.5; }
-  .val-ro { opacity: 0.75; }
+  .val-ro { display: none; }
+  .tree-value { display: flex; align-items: flex-start; gap: 5px; }
+  .tree-edit {
+    border: 0; background: none; padding: 0; color: rgba(255,255,255,0.5);
+    cursor: pointer; font: inherit;
+  }
+  .tree-edit:hover { color: #ff9d6c; }
   .lock { font-size: 10px; }
   .edit {
     font-family: monospace; font-size: 12px;

@@ -21,16 +21,17 @@ jobs:
       - run: npm run build
       - name: Publish installable branch
         run: |
-          mkdir release
+          git clone --depth 1 --branch dist "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" release
+          cd release
+          git rm -rf .
+          cd ..
           cp README.md LICENSE release/
           cp -R dist release/dist
           cp src/plugin/index.d.ts release/dist/plugin/index.d.ts
           node -e "const fs=require('fs'); const pkg=require('./package.json'); delete pkg.devDependencies; delete pkg.scripts; pkg.types='./dist/plugin/index.d.ts'; pkg.exports['.'].types=pkg.types; pkg.files=['dist','README.md','LICENSE']; fs.writeFileSync('release/package.json', JSON.stringify(pkg,null,2)+'\\n')"
           cd release
-          git init -b dist
           git config user.name github-actions[bot]
           git config user.email 41898282+github-actions[bot]@users.noreply.github.com
           git add .
-          git commit -m "📦 build dist"
-          git remote add origin "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git"
-          git push --force origin dist
+          git diff --cached --quiet || git commit -m "build dist"
+          git push origin dist

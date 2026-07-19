@@ -854,44 +854,6 @@ function safeClone(obj: unknown): Record<string, unknown> {
   return cloneSnapshotRecord(obj)
 }
 
-/* legacy implementation retained below temporarily
-  if (obj == null || typeof obj !== 'object') return {}
-  if (depth <= 0) return { '': SAFE_CLONE_MAX_DEPTH_VALUE }
-  // Fast path: empty props/state objects are extremely common; skip iteration.
-  const keys = Object.keys(obj as object)
-  if (keys.length === 0) return {}
-  const out: Record<string, unknown> = {}
-  for (const k of keys) {
-    try {
-      out[k] = cloneSnapshotValue((obj as Record<string, unknown>)[k], depth - 1)
-    } catch {
-      // Getter or enumerable access threw — omit rather than risk side-effects.
-      out[k] = '[object]'
-    }
-  }
-  return out
-}
-
-function cloneSnapshotValue(v: unknown, depth: number): unknown {
-  if (v === undefined) return SDT_UNDEFINED
-  // Skip functions and Svelte snippets entirely — calling String() on a snippet
-  // throws snippet_without_render_tag, and functions are not useful to display.
-  if (typeof v === 'function') return undefined
-  if (v === null || typeof v !== 'object') return v
-  if (depth <= 0) return SAFE_CLONE_MAX_DEPTH_VALUE
-  if (Array.isArray(v)) return v.map((item) => cloneSnapshotValue(item, depth - 1))
-  if (v instanceof Date) return v.toISOString()
-  if (v instanceof Map) return safeClone(Object.fromEntries(v), depth - 1)
-  if (v instanceof Set) return safeClone(Array.from(v), depth - 1)
-  if (ArrayBuffer.isView(v) && !(v instanceof DataView)) {
-    return Array.from(v as unknown as ArrayLike<unknown>).map((item) => cloneSnapshotValue(item, depth - 1))
-  }
-  return safeClone(v, depth - 1)
-}
-
-/** Clone a store value — preserves arrays (unlike safeClone which always returns a plain object). */
-*/
-
 function safeCloneStoreValue(value: unknown): unknown {
   return copySnapshotValue(value)
 }

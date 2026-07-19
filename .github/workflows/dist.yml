@@ -1,0 +1,36 @@
+name: Build dist branch
+
+on:
+  push:
+    branches: [master]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run build
+      - name: Publish installable branch
+        run: |
+          mkdir release
+          cp README.md LICENSE release/
+          cp -R dist release/dist
+          cp src/plugin/index.d.ts release/dist/plugin/index.d.ts
+          node -e "const fs=require('fs'); const pkg=require('./package.json'); pkg.types='./dist/plugin/index.d.ts'; pkg.exports['.'].types=pkg.types; pkg.files=['dist','README.md','LICENSE']; fs.writeFileSync('release/package.json', JSON.stringify(pkg,null,2)+'\\n')"
+          cd release
+          git init -b dist
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add .
+          git commit -m "📦 build dist"
+          git remote add origin "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git"
+          git push --force origin dist

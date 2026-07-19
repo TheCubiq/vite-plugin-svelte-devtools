@@ -19,15 +19,16 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run build
-      - name: Prepare release files
+      - name: Pack release
         run: |
-          cp README.md LICENSE dist/
-          cp src/plugin/index.d.ts dist/plugin/index.d.ts
-          node -e "const fs=require('fs'); const pkg=require('./package.json'); delete pkg.devDependencies; delete pkg.scripts; pkg.main='./plugin/index.cjs'; pkg.module='./plugin/index.js'; pkg.types='./plugin/index.d.ts'; pkg.exports['.']={types:pkg.types,import:pkg.module,require:pkg.main}; pkg.files=['**/*']; fs.writeFileSync('dist/package.json', JSON.stringify(pkg,null,2)+'\\n')"
+          mkdir .release
+          npm pack --pack-destination .release
+          mkdir release
+          tar -xzf .release/*.tgz -C release --strip-components=1
       - name: Deploy to dist branch
         uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./dist
+          publish_dir: ./release
           publish_branch: dist
           commit_message: "build: update dist assets [skip ci]"

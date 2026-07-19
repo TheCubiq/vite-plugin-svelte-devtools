@@ -17,21 +17,17 @@ jobs:
         with:
           node-version: 22
           cache: npm
-      - run: npm install
+      - run: npm ci
       - run: npm run build
-      - name: Publish installable branch
+      - name: Prepare release files
         run: |
-          git clone --depth 1 --branch dist "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" release
-          cd release
-          git rm -rf .
-          cd ..
-          cp README.md LICENSE release/
-          cp -R dist release/dist
-          cp src/plugin/index.d.ts release/dist/plugin/index.d.ts
-          node -e "const fs=require('fs'); const pkg=require('./package.json'); delete pkg.devDependencies; delete pkg.scripts; pkg.types='./dist/plugin/index.d.ts'; pkg.exports['.'].types=pkg.types; pkg.files=['dist','README.md','LICENSE']; fs.writeFileSync('release/package.json', JSON.stringify(pkg,null,2)+'\\n')"
-          cd release
-          git config user.name github-actions[bot]
-          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
-          git add .
-          git diff --cached --quiet || git commit -m "build dist"
-          git push origin dist
+          cp README.md LICENSE dist/
+          cp src/plugin/index.d.ts dist/plugin/index.d.ts
+          node -e "const fs=require('fs'); const pkg=require('./package.json'); delete pkg.devDependencies; delete pkg.scripts; pkg.main='./plugin/index.cjs'; pkg.module='./plugin/index.js'; pkg.types='./plugin/index.d.ts'; pkg.exports['.']={types:pkg.types,import:pkg.module,require:pkg.main}; pkg.files=['**/*']; fs.writeFileSync('dist/package.json', JSON.stringify(pkg,null,2)+'\\n')"
+      - name: Deploy to dist branch
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./dist
+          publish_branch: dist
+          commit_message: "build: update dist assets [skip ci]"

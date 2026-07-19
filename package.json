@@ -1,0 +1,56 @@
+{
+  "name": "vite-plugin-svelte-devtools",
+  "version": "0.1.7",
+  "description": "Dev-tools panel for Svelte 5 + Vite apps — component tree, reactive state, props editor, event log, store inspector, performance profiler",
+  "type": "module",
+  "main": "./dist/plugin/index.cjs",
+  "module": "./dist/plugin/index.js",
+  "types": "./dist/plugin/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/plugin/index.d.ts",
+      "import": "./dist/plugin/index.js",
+      "require": "./dist/plugin/index.cjs"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "peerDependencies": {
+    "@vitejs/devtools-kit": "^0.3.4",
+    "svelte": "^5.0.0",
+    "vite": "^8.0.0"
+  },
+  "peerDependenciesMeta": {
+    "@vitejs/devtools-kit": {
+      "optional": true
+    }
+  },
+  "keywords": [
+    "svelte",
+    "svelte5",
+    "svelte-devtools",
+    "vite-devtools-plugin",
+    "vite",
+    "devtools",
+    "plugin",
+    "inspector",
+    "debugging"
+  ],
+  "author": "Zixtar",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Zixtar/vite-plugin-svelte-devtools.git"
+  },
+  "homepage": "https://github.com/Zixtar/vite-plugin-svelte-devtools#readme",
+  "bugs": {
+    "url": "https://github.com/Zixtar/vite-plugin-svelte-devtools/issues"
+  },
+  "dependencies": {
+    "launch-editor": "^2.13.2",
+    "magic-string": "^0.30.0"
+  }
+}

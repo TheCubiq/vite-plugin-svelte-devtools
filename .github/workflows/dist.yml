@@ -25,7 +25,7 @@ jobs:
           cp README.md LICENSE release/
           cp -R dist release/dist
           cp src/plugin/index.d.ts release/dist/plugin/index.d.ts
-          node -e "const fs=require('fs'); const pkg=require('./package.json'); pkg.types='./dist/plugin/index.d.ts'; pkg.exports['.'].types=pkg.types; pkg.files=['dist','README.md','LICENSE']; fs.writeFileSync('release/package.json', JSON.stringify(pkg,null,2)+'\\n')"
+          node -e "const fs=require('fs'); const pkg=require('./package.json'); delete pkg.devDependencies; delete pkg.scripts; pkg.types='./dist/plugin/index.d.ts'; pkg.exports['.'].types=pkg.types; pkg.files=['dist','README.md','LICENSE']; fs.writeFileSync('release/package.json', JSON.stringify(pkg,null,2)+'\\n')"
           cd release
           git init -b dist
           git config user.name github-actions[bot]

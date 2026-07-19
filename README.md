@@ -51,6 +51,12 @@ Works as a native tab inside the **[@vitejs/devtools](https://github.com/vitejs/
 npm i -D vite-plugin-svelte-devtools
 ```
 
+From this fork without publishing to npm:
+
+```bash
+pnpm add -D github:TheCubiq/vite-plugin-svelte-devtools#dist
+```
+
 ---
 
 ## Setup

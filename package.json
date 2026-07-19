@@ -3,19 +3,30 @@
   "version": "0.1.7",
   "description": "Dev-tools panel for Svelte 5 + Vite apps — component tree, reactive state, props editor, event log, store inspector, performance profiler",
   "type": "module",
-  "main": "./plugin/index.cjs",
-  "module": "./plugin/index.js",
-  "types": "./plugin/index.d.ts",
+  "main": "./dist/plugin/index.cjs",
+  "module": "./dist/plugin/index.js",
+  "types": "./src/plugin/index.d.ts",
   "exports": {
     ".": {
-      "types": "./plugin/index.d.ts",
-      "import": "./plugin/index.js",
-      "require": "./plugin/index.cjs"
+      "types": "./src/plugin/index.d.ts",
+      "import": "./dist/plugin/index.js",
+      "require": "./dist/plugin/index.cjs"
     }
   },
   "files": [
-    "**/*"
+    "dist",
+    "src",
+    "README.md",
+    "LICENSE"
   ],
+  "scripts": {
+    "build:lib": "vite build",
+    "build:spa": "cross-env BUILD_TARGET=spa vite build",
+    "build": "npm run build:lib && npm run build:spa",
+    "dev": "vite build --watch",
+    "test": "vitest run",
+    "prepublishOnly": "npm run build"
+  },
   "peerDependencies": {
     "@vitejs/devtools-kit": "^0.3.4",
     "svelte": "^5.0.0",
@@ -26,11 +37,22 @@
       "optional": true
     }
   },
+  "devDependencies": {
+    "@jridgewell/sourcemap-codec": "^1.5.5",
+    "@sveltejs/vite-plugin-svelte": "^7.0.0",
+    "@types/node": "^25.6.2",
+    "@vitejs/devtools-kit": "0.3.4",
+    "cross-env": "^10.1.0",
+    "svelte": "^5.46.4",
+    "typescript": "^5.0.0",
+    "vite": "^8.0.0",
+    "vitest": "4.1.2"
+  },
   "keywords": [
     "svelte",
     "svelte5",
-    "svelte-devtools",
-    "vite-devtools-plugin",
+	"svelte-devtools",
+	"vite-devtools-plugin",
     "vite",
     "devtools",
     "plugin",

@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Svelte DevTools</title>
+
+  <!-- Single source of truth for all DevTools styles. -->
+  <!-- main.ts imports this same file via `?raw` for the shadow DOM path.  -->
+  <link rel="stylesheet" href="./devtools.css" />
+
+  <style>
+    /*
+     * iframe-path overrides only — keep this minimal.
+     * Add nothing here that belongs in devtools.css.
+     */
+
+    html, body, #svelte-devtools-root {
+      height: 100%;
+      width: 100%;
+      background: #0f1923;
+      color: #d0d0d0;
+      font-family: 'Consolas', 'Fira Code', monospace;
+      font-size: 13px;
+      overflow: hidden;
+    }
+    #svelte-devtools-root {
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* In iframe mode the panel fills the container instead of floating. */
+    html body #svelte-devtools-root .panel {
+      position: static;
+      width: 100%;
+      height: 100%;
+      min-width: unset;
+      min-height: unset;
+      border: none;
+      border-radius: 0;
+      box-shadow: inset 0 0 0 0 transparent;
+      resize: none;
+      transition: box-shadow 0.15s;
+    }
+    html body #svelte-devtools-root .panel.pick-active { outline: none; box-shadow: inset 0 0 0 3px #ff3e00; }
+    html body #svelte-devtools-root .panel.paused      { outline: none; box-shadow: inset 0 0 0 3px #c9a227; }
+
+    /* No floating badge or close button in iframe mode. */
+    .badge        { display: none; }
+    .tb-btn--close { display: none; }
+
+    /* No drag cursor on titlebar in iframe mode. */
+    .titlebar { cursor: default; }
+    .titlebar:active { cursor: default; }
+  </style>
+</head>
+<body>
+  <script type="module" src="./iframe-entry.ts"></script>
+</body>
+</html>

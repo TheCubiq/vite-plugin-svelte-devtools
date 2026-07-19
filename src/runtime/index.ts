@@ -9,6 +9,9 @@
  *  4. Listens for commands from the overlay (prop edits, highlight requests).
  */
 
+import { cloneSnapshotRecord, cloneSnapshotValue as copySnapshotValue } from './snapshot'
+export { SDT_UNDEFINED } from './snapshot'
+
 // ---------------------------------------------------------------------------
 // Types (inlined so this file is self-contained when served as a virtual module)
 // ---------------------------------------------------------------------------
@@ -837,10 +840,7 @@ function clearHighlight() {
 // ---------------------------------------------------------------------------
 
 /** Sentinel stored in place of `undefined` so the value survives JSON serialization. */
-export const SDT_UNDEFINED = '__sdt_undefined__'
-
-const SAFE_CLONE_DEPTH = 5
-const SAFE_CLONE_MAX_DEPTH_VALUE = '[max-depth]'
+const SDT_UNDEFINED = '__sdt_undefined__'
 
 /**
  * Snapshot a props/state object for the devtools panel.
@@ -850,7 +850,11 @@ const SAFE_CLONE_MAX_DEPTH_VALUE = '[max-depth]'
  * common case (plain objects / arrays / primitives) much faster while still producing
  * a structured-clone-safe result.
  */
-function safeClone(obj: unknown, depth = SAFE_CLONE_DEPTH): Record<string, unknown> {
+function safeClone(obj: unknown): Record<string, unknown> {
+  return cloneSnapshotRecord(obj)
+}
+
+/* legacy implementation retained below temporarily
   if (obj == null || typeof obj !== 'object') return {}
   if (depth <= 0) return { '': SAFE_CLONE_MAX_DEPTH_VALUE }
   // Fast path: empty props/state objects are extremely common; skip iteration.
@@ -880,14 +884,16 @@ function cloneSnapshotValue(v: unknown, depth: number): unknown {
   if (v instanceof Map) return safeClone(Object.fromEntries(v), depth - 1)
   if (v instanceof Set) return safeClone(Array.from(v), depth - 1)
   if (ArrayBuffer.isView(v) && !(v instanceof DataView)) {
-    return Array.from(v as ArrayLike<unknown>).map((item) => cloneSnapshotValue(item, depth - 1))
+    return Array.from(v as unknown as ArrayLike<unknown>).map((item) => cloneSnapshotValue(item, depth - 1))
   }
   return safeClone(v, depth - 1)
 }
 
 /** Clone a store value — preserves arrays (unlike safeClone which always returns a plain object). */
+*/
+
 function safeCloneStoreValue(value: unknown): unknown {
-  return cloneSnapshotValue(value, SAFE_CLONE_DEPTH)
+  return copySnapshotValue(value)
 }
 
 function deepClone<T>(v: T): T {

@@ -52,6 +52,21 @@ import type { PreprocessorGroup } from 'svelte/compiler'
 import { readFileSync } from 'fs'
 import MagicString from 'magic-string'
 
+/**
+ * Collapses the generated instrumentation onto a single line so it can be
+ * inlined into an existing line of the script without shifting line numbers.
+ * Svelte computes add_svelte_meta locs from the preprocessed source (no
+ * sourcemap), so every injected newline would offset every template element's
+ * reported line and break inspector click-to-open.
+ */
+function collapseInjection(code: string): string {
+  return code
+    .replace(/\/\*[\s\S]*?\*\//g, ' ')
+    .replace(/^[ \t]*\/\/.*$/gm, ' ')
+    .replace(/[ \t]*\n[ \t]*/g, ' ')
+    .trim()
+}
+
 export function devToolsPreprocessor(componentName: string): PreprocessorGroup {
   return {
     name: 'svelte-devtools',
@@ -185,11 +200,16 @@ $effect(() => {
         : content
 
       // Use MagicString so the original code lines keep their source positions.
-      // The appended injection lines have no source mapping (they are generated).
-      // Passing source: filename ensures Vite's combineSourcemaps() doesn't
-      // replace sources[0] with the original unpreprocessed file content.
+      // The instrumentation is collapsed to a single line and inlined into the
+      // first content line, so the preprocessed script has exactly as many
+      // lines as the original — Svelte computes element locs from the
+      // preprocessed source, so any injected line breaks would shift every
+      // template element's reported line and break open-in-editor.
+      const singleLine = collapseInjection(injection)
+      let at = 0
+      while (rewrittenContent[at] === '\n') at++
       const ms = new MagicString(rewrittenContent)
-      ms.append(injection)
+      ms.appendLeft(at, singleLine + ' ')
       return {
         code: ms.toString(),
         map: ms.generateMap({ hires: true, includeContent: true, source: filename ?? '' }),

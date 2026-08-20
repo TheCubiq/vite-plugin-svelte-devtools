@@ -20,7 +20,8 @@ export function openInEditorHandler(
   const url = new URL(req.url ?? '', 'http://localhost')
   const file = url.searchParams.get('file') ?? ''
   if (!file) { res.statusCode = 400; res.end('missing file'); return }
-  _launch(file + ':1:1', undefined, (fileName: string, errorMsg: string) => {
+  const hasPosition = /:\d+(:\d+)?$/.test(file)
+  _launch(hasPosition ? file : file + ':1:1', undefined, (fileName: string, errorMsg: string) => {
     console.warn(`[svelte-devtools] Could not open ${fileName} in editor: ${errorMsg}`)
   })
   res.statusCode = 200
